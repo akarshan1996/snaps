@@ -1,0 +1,22 @@
+{
+  "name": "snaps",
+  "version": "0.0.1",
+  "description": "Access Snapchat API",
+  "main": "lib/snaps.js",
+  "keywords": [
+    "snapchat"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jcfrancisco/snaps.git"
+  },
+  "author": {
+    "name": "Carlo Francisco",
+    "email": "carlo@jcfrancisco.com>"
+  },
+  "dependencies": {
+    "traceur": "~0.0.43"
+  },
+  "devDependencies": {
+  }
+}
