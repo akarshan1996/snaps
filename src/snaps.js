@@ -1,5 +1,6 @@
 require('traceur/bin/traceur-runtime');
 var crypto = require('crypto');
+var {map} = require('underscore');
 
 export class Snaps {
   constructor() {
@@ -25,15 +26,12 @@ export class Snaps {
     var second = crypto.createHash('sha256')
                        .update(timestamp + this.SECRET)
                        .digest('hex');
-    var bits = [];
-    for (var i = 0; i < this.PATTERN.length; i++) {
-      var c = this.PATTERN[i];
+    return map(this.PATTERN, function(c, i) {
       if (c == '0') {
-        bits.push(first[i]);
+        return first[i];
       } else {
-        bits.push(second[i]);
+        return second[i];
       }
-    }
-    return bits.join('');
+    }).join('');
   }
 }
