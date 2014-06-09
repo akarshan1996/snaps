@@ -1,7 +1,7 @@
 snaps
 =====
 
-Snapchat API wrapper in JavaScript
+Snapchat API wrapper in JavaScript, using some ES6 features via Traceur.
 
 ## Example
 
