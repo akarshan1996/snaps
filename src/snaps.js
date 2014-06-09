@@ -4,14 +4,16 @@ var {map} = require('underscore');
 var request = require('request');
 
 export class Snaps {
-  constructor() {
+  constructor(username, password) {
     this.STATIC_TOKEN = 'm198sOkJEn37DjqZ32lpRu76xmw288xSQ9';
     this.SECRET = 'iEk21fuwZApXlz93750dmW22pw389dPwOk';
     this.PATTERN = '0001110111101110001111010101111011010001001110011000110001000110';
     this.baseUrl = 'https://feelinsonice-hrd.appspot.com';
+
+    return this._login(username, password);
   }
 
-  login(username, password) {
+  _login(username, password) {
     var timestamp = Date.now();
     var loginParams = {
       "username": username,
@@ -31,7 +33,7 @@ export class Snaps {
           reject(Error('Error logging in.'));
         } else {
           this.authToken = body.auth_token;
-          resolve();
+          resolve(this);
         }
       })
     })
@@ -56,7 +58,6 @@ export class Snaps {
   _hasAuthToken() {
     return this.authToken != null;
   }
-
 
   _request(options, cb) {
     request(options, cb)
