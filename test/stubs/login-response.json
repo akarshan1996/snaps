@@ -1,0 +1,27 @@
+{
+   "bests":[
+   ],
+   "score":641,
+   "received":478,
+   "logged":true,
+   "added_friends":[
+   ],
+   "device_token":"68109E42465DDDC2E7F038D11F8E0FCF3B78E9750C83E384AC637C7E17ADA9DF",
+   "snap_p":0,
+   "mobile_verification_key":"MTM2MjpqY2ZyYW5jaXNjbw\u003d\u003d",
+   "recents":[
+   ],
+   "added_friends_timestamp":1402003001228,
+   "notification_sound_setting":"OFF",
+   "searchable_by_phone_number":true,
+   "snapchat_phone_number":"+17864088363",
+   "auth_token":"77ba2422-6cab-5967-bc28-eaa95eb44fb0",
+   "image_caption":false,
+   "country_code":"US",
+   "current_timestamp":1402283479193,
+   "can_view_mature_content":false,
+   "email":"test@snaps.com",
+   "should_send_text_to_verify_number":false,
+   "should_call_to_verify_number":false,
+   "mobile":"+12035551234"
+}

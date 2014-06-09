@@ -4,6 +4,15 @@ var Snaps = require('../lib/snaps').Snaps;
 describe('Snaps', function() {
   before(function() {
     this.snaps = new Snaps();
+    this.snaps._request = function(options, cb) {
+      if (options.uri.match(/\/bq\/login$/) &&
+          options.qs.username == 'test-user' &&
+          options.qs.password == 'test-password') {
+        cb(null, null, require('./stubs/login-response.json'));
+      } else {
+        cb(null, null, {});
+      }
+    }
   })
 
   describe('#constructor', function() {
@@ -13,14 +22,16 @@ describe('Snaps', function() {
   })
 
   describe('#login', function() {
-    it('should include the username, timestamp, req_token, and password in the hash', function() {
-      var currentTime = Date.now();
-      this.snaps.login('foo', 'bar');
+    var loginResponse;
 
-      this.snaps.loginParams.username.should.equal('foo');
-      this.snaps.loginParams.timestamp.should.be.approximately(currentTime, 100);
-      this.snaps.loginParams.req_token.should.be.ok;
-      this.snaps.loginParams.password.should.be.equal('bar');
+    before(function(done) {
+      this.snaps.login('test-user', 'test-password').then(function(response) {
+        done();
+      })
+    })
+
+    it('should return an auth token in the login response', function() {
+      this.snaps._hasAuthToken().should.be.true;
     })
   })
 
