@@ -27,7 +27,7 @@ export class Snaps {
         "uri": this.baseUrl + '/bq/login',
         "qs": loginParams,
         "method": "POST",
-        "timeout": 10000
+        "timeout": 2000
       }, (err, httpResponse, body) => {
         if (err) {
           reject(Error('Error logging in.'));
