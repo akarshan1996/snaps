@@ -54,13 +54,11 @@ describe('Snaps', function() {
   describe('#send', function() {
     before(function() {
       this.sendTestImage = function(snaps) {
-        return snaps.send(fs.readFileSync('./test/sample.jpg'));
+        return snaps.send(fs.readFileSync('./test/sample.jpg'), ['foo-user', 'bar-user'], 5);
       }
     })
 
     it('should throw an error when the request fails', function(done) {
-      // to-do: stub out request method again
-
       createSnaps().then(this.sendTestImage).then(function() {
         done(new Error("'Send image' promise should not have been fulfilled."));
       }, function(err) {

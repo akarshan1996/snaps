@@ -3,6 +3,8 @@ var crypto = require('crypto');
 var {login} = require('./endpoints/bq_login');
 var {map} = require('underscore');
 var request = require('request');
+var {send} = require('./endpoints/ph_send');
+var {uploadImage} = require('./endpoints/ph_upload');
 
 export class Snaps {
   constructor(username, password) {
@@ -16,6 +18,20 @@ export class Snaps {
     var loginPromise = login(username, password, timestamp, reqToken, this._request, this.baseUrl);
     return loginPromise.then((loginResponse) => {
       this.authToken = loginResponse.auth_token;
+      return this;
+    })
+  }
+
+  send(rawImageData, recipients, snapTime) {
+    var imageData = this._encryptImage(rawImageData);
+    var timestamp = Date.now();
+    var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
+    var uploadPromise = uploadImage(imageData, username, timestamp, reqToken, this._request, this.baseUrl);
+    uploadPromise.then((mediaId) => {
+      var timestamp = Date.now();
+      var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
+      return send(recipients.join(','), time, mediaId, username, timestamp, reqToken);
+    }).then(() => {
       return this;
     })
   }
