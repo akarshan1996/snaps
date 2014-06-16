@@ -1,17 +1,39 @@
+var _ = require('underscore');
+var fs = require('fs');
 var should = require('should');
 var Snaps = require('../lib/snaps').Snaps;
 
 describe('Snaps', function() {
   var createSnaps;
 
-  before(function() {
+  beforeEach(function() {
+    var validateParamsExist = function(params, requestOptions, cb) {
+      var missingParams = _.reject(params, function(param) {
+        return _.contains(_.keys(requestOptions.qs), param);
+      })
+      if (missingParams.length > 0) {
+        cb(new Error("The following params were missing in the request: " + missingParams.join(', ')), null, {});
+      }
+    }
+
     Snaps.prototype._request = function(options, cb) {
       if (options.uri.match(/\/bq\/login$/) &&
           options.qs.username == 'test-user' &&
           options.qs.password == 'test-password') {
+        validateParamsExist(['req_token', 'timestamp'], options, cb);
         cb(null, null, require('./stubs/login-response.json'));
-      } else {
+      } else if (options.uri.match(/\/ph\/upload$/) &&
+                 options.qs.data == 'sample-image-data' &&
+                 options.qs.media_id == 'TEST-USER~9c0b0193-de58-4b8d-9a09-60039648ba7f' &&
+                 options.qs.username == 'test-user' &&
+                 options.qs.type == 0) {
+        validateParamsExist(['req_token', 'timestamp'], options, cb);
         cb(null, null, {});
+      } else if (options.uri.match(/\ph\/send$/) &&
+                 options.qs.media_id == 'TEST-USER~9c0b0193-de58-4b8d-9a09-60039648ba7f') {
+        validateParamsExist(['req_token', 'timestamp', 'recipient'], options, cb);
+      } else {
+        cb(new Error('Request not recognized'), null, {});
       }
     }
 
@@ -25,7 +47,35 @@ describe('Snaps', function() {
       createSnaps().then(function(snaps) {
         snaps._hasAuthToken().should.be.true;
         done();
+      }, done)
+    })
+  })
+
+  describe('#send', function() {
+    before(function() {
+      this.sendTestImage = function(snaps) {
+        return snaps.send(fs.readFileSync('./test/sample.jpg'));
+      }
+    })
+
+    it('should throw an error when the request fails', function(done) {
+      // to-do: stub out request method again
+
+      createSnaps().then(this.sendTestImage).then(function() {
+        done(new Error("'Send image' promise should not have been fulfilled."));
+      }, function(err) {
+        // to-do: check that err is what we expect
+        done();
       })
+    })
+
+    it('should not throw an error when the request succeeds', function(done) {
+      var sendTestImage = function(snaps) {
+        return snaps.send(fs.readFileSync('./test/sample.jpg'));
+      }
+      createSnaps().then(sendTestImage).then(function() {
+        done();
+      }, done)
     })
   })
 

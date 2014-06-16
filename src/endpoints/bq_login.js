@@ -14,7 +14,7 @@ export function login(username, password, timestamp, reqToken, request, baseUrl)
       "timeout": 2000
     }, (err, httpResponse, body) => {
       if (err) {
-        reject(Error('Error logging in.'));
+        reject(err);
       } else {
         resolve(body);
       }
