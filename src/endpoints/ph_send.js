@@ -16,8 +16,8 @@ export function phSend(mediaId, recipients, snapTime, username, timestamp, reqTo
       "method": "POST",
       "timeout": 2000
     }, (err, httpResponse, body) => {
-      if (err) {
-        reject(err);
+      if (err || httpResponse.statusCode != 200) {
+        reject(err || new Error("Status code of send request was " + httpResponse.statusCode));
       } else {
         resolve(body);
       }

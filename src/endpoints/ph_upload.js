@@ -25,8 +25,8 @@ var upload = function(type, imageData, username, timestamp, reqToken, request, b
       "method": "POST",
       "timeout": 2000
     }, (err, httpResponse, body) => {
-      if (err) {
-        reject(err);
+      if (err || httpResponse.statusCode != 200) {
+        reject(err || new Error("Status code of upload request was " + httpResponse.statusCode));
       } else {
         resolve(mediaId);
       }
