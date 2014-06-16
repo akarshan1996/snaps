@@ -24,17 +24,20 @@ describe('Snaps', function() {
         cb(null, null, require('./stubs/login-response.json'));
       } else if (options.uri.match(/\/ph\/upload$/) &&
                  options.qs.data == 'sample-image-data' &&
-                 options.qs.media_id == 'TEST-USER~9c0b0193-de58-4b8d-9a09-60039648ba7f' &&
                  options.qs.username == 'test-user' &&
                  options.qs.type == 0) {
-        validateParamsExist(['req_token', 'timestamp'], options, cb);
+        validateParamsExist(['media_id', 'req_token', 'timestamp'], options, cb);
         cb(null, null, {});
-      } else if (options.uri.match(/\ph\/send$/) &&
-                 options.qs.media_id == 'TEST-USER~9c0b0193-de58-4b8d-9a09-60039648ba7f') {
-        validateParamsExist(['req_token', 'timestamp', 'recipient'], options, cb);
+      } else if (options.uri.match(/\/ph\/send$/)) {
+        validateParamsExist(['media_id', 'req_token', 'timestamp', 'recipient', 'time'], options, cb);
+        cb(null, null, {})
       } else {
         cb(new Error('Request not recognized'), null, {});
       }
+    }
+
+    Snaps.prototype._encryptImage = function(rawImageData) {
+      return rawImageData;
     }
 
     createSnaps = function() {
@@ -52,27 +55,28 @@ describe('Snaps', function() {
   })
 
   describe('#send', function() {
-    before(function() {
-      this.sendTestImage = function(snaps) {
-        return snaps.send(fs.readFileSync('./test/sample.jpg'), ['foo-user', 'bar-user'], 5);
+    it('should throw an error when the upload request fails', function(done) {
+      var sendTestImage = function(snaps) {
+        return snaps.send('invalid-image-data', ['foo-user', 'bar-user'], 5, 'test-user');
       }
-    })
-
-    it('should throw an error when the request fails', function(done) {
-      createSnaps().then(this.sendTestImage).then(function() {
-        done(new Error("'Send image' promise should not have been fulfilled."));
-      }, function(err) {
-        // to-do: check that err is what we expect
+      createSnaps().then(sendTestImage).then(function() {
+        done(new Error("'Send image' promise should not have resolved successfully."));
+      }).catch(function(err) {
+        // ignore err
         done();
       })
     })
 
-    it('should not throw an error when the request succeeds', function(done) {
+    it('should not throw an error when the upload request succeeds', function(done) {
       var sendTestImage = function(snaps) {
-        return snaps.send(fs.readFileSync('./test/sample.jpg'));
+        return snaps.send('sample-image-data', ['foo-user', 'bar-user'], 5, 'test-user');
       }
-      createSnaps().then(sendTestImage).then(function() {
-        done();
+      createSnaps().then(sendTestImage).then(function(snaps) {
+        if (snaps) {
+          done();
+        } else {
+          done(new Error("'Send image promise did not return the snaps object"));
+        }
       }, done)
     })
   })

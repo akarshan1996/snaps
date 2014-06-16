@@ -34,6 +34,6 @@ var upload = function(type, imageData, username, timestamp, reqToken, request, b
   })
 }
 
-export function uploadImage(imageData, username, timestamp, reqToken, request, baseUrl) {
-  upload(0, username, timestamp, reqToken, request, baseUrl)
+export function phUploadImage(imageData, username, timestamp, reqToken, request, baseUrl) {
+  return upload(0, imageData, username, timestamp, reqToken, request, baseUrl)
 }

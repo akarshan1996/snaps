@@ -1,10 +1,10 @@
 require('traceur/bin/traceur-runtime');
 var crypto = require('crypto');
-var {login} = require('./endpoints/bq_login');
+var {bqLogin} = require('./endpoints/bq_login');
 var {map} = require('underscore');
 var request = require('request');
-var {send} = require('./endpoints/ph_send');
-var {uploadImage} = require('./endpoints/ph_upload');
+var {phSend} = require('./endpoints/ph_send');
+var {phUploadImage} = require('./endpoints/ph_upload');
 
 export class Snaps {
   constructor(username, password) {
@@ -15,25 +15,29 @@ export class Snaps {
 
     var timestamp = Date.now();
     var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
-    var loginPromise = login(username, password, timestamp, reqToken, this._request, this.baseUrl);
+    var loginPromise = bqLogin(username, password, timestamp, reqToken, this._request, this.baseUrl);
     return loginPromise.then((loginResponse) => {
       this.authToken = loginResponse.auth_token;
       return this;
     })
   }
 
-  send(rawImageData, recipients, snapTime) {
+  send(rawImageData, recipients, snapTime, username) {
     var imageData = this._encryptImage(rawImageData);
     var timestamp = Date.now();
     var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
-    var uploadPromise = uploadImage(imageData, username, timestamp, reqToken, this._request, this.baseUrl);
-    uploadPromise.then((mediaId) => {
+    var uploadPromise = phUploadImage(imageData, username, timestamp, reqToken, this._request, this.baseUrl);
+    return uploadPromise.then((mediaId) => {
       var timestamp = Date.now();
       var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
-      return send(recipients.join(','), time, mediaId, username, timestamp, reqToken);
+      return phSend(mediaId, recipients.join(','), snapTime, username, timestamp, reqToken, this._request, this.baseUrl);
     }).then(() => {
       return this;
     })
+  }
+
+  _encryptImage(rawImageData) {
+    return rawImageData;
   }
 
   _getRequestToken(authToken, timestamp) {

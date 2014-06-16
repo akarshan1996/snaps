@@ -1,4 +1,4 @@
-export function login(username, password, timestamp, reqToken, request, baseUrl) {
+export function bqLogin(username, password, timestamp, reqToken, request, baseUrl) {
   var loginParams = {
     "username": username,
     "timestamp": timestamp,
