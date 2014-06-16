@@ -12,6 +12,7 @@ export class Snaps {
     this.SECRET = 'iEk21fuwZApXlz93750dmW22pw389dPwOk';
     this.PATTERN = '0001110111101110001111010101111011010001001110011000110001000110';
     this.baseUrl = 'https://feelinsonice-hrd.appspot.com';
+    this.ENCRYPTION_KEY = 'M02cnQ51Ji97vwT4'
 
     var timestamp = Date.now();
     var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
@@ -37,7 +38,9 @@ export class Snaps {
   }
 
   _encryptImage(rawImageData) {
-    return rawImageData;
+    var cipher = crypto.createCipher('aes-128-ecb', this.ENCRYPTION_KEY)
+    cipher.update(rawImageData);
+    return cipher.final();
   }
 
   _getRequestToken(authToken, timestamp) {

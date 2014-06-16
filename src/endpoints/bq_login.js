@@ -16,7 +16,7 @@ export function bqLogin(username, password, timestamp, reqToken, request, baseUr
       if (err) {
         reject(err);
       } else {
-        resolve(body);
+        resolve(JSON.parse(body));
       }
     })
   })
