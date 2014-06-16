@@ -1,5 +1,6 @@
 require('traceur/bin/traceur-runtime');
 var crypto = require('crypto');
+var {login} = require('./endpoints/bq_login');
 var {map} = require('underscore');
 var request = require('request');
 
@@ -10,32 +11,12 @@ export class Snaps {
     this.PATTERN = '0001110111101110001111010101111011010001001110011000110001000110';
     this.baseUrl = 'https://feelinsonice-hrd.appspot.com';
 
-    return this._login(username, password);
-  }
-
-  _login(username, password) {
     var timestamp = Date.now();
-    var loginParams = {
-      "username": username,
-      "timestamp": timestamp,
-      "req_token": this._getRequestToken(this.STATIC_TOKEN, timestamp),
-      "password": password
-    }
-
-    return new Promise((resolve, reject) => {
-      this._request({
-        "uri": this.baseUrl + '/bq/login',
-        "qs": loginParams,
-        "method": "POST",
-        "timeout": 2000
-      }, (err, httpResponse, body) => {
-        if (err) {
-          reject(Error('Error logging in.'));
-        } else {
-          this.authToken = body.auth_token;
-          resolve(this);
-        }
-      })
+    var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
+    var loginPromise = login(username, password, timestamp, reqToken, this._request, this.baseUrl);
+    return loginPromise.then((loginResponse) => {
+      this.authToken = loginResponse.auth_token;
+      return this;
     })
   }
 
@@ -60,6 +41,6 @@ export class Snaps {
   }
 
   _request(options, cb) {
-    request(options, cb)
+    return request(options, cb);
   }
 }
