@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 var generateMediaId = function(username) {
   var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
@@ -19,9 +21,8 @@ var upload = function(type, imageData, username, timestamp, reqToken, request, b
   }
 
   return new Promise((resolve, reject) => {
-    request({
+    var form = request({
       "uri": baseUrl + '/ph/upload',
-      "qs": uploadParams,
       "method": "POST",
       "timeout": 2000
     }, (err, httpResponse, body) => {
@@ -30,6 +31,9 @@ var upload = function(type, imageData, username, timestamp, reqToken, request, b
       } else {
         resolve(mediaId);
       }
+    }).form()
+    _(uploadParams).each((value, key) => {
+      form.append(key, value);
     })
   })
 }

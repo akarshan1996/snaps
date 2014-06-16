@@ -26,11 +26,11 @@ export class Snaps {
   send(rawImageData, recipients, snapTime, username) {
     var imageData = this._encryptImage(rawImageData);
     var timestamp = Date.now();
-    var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
+    var reqToken = this._getRequestToken(this.authToken, timestamp);
     var uploadPromise = phUploadImage(imageData, username, timestamp, reqToken, this._request, this.baseUrl);
     return uploadPromise.then((mediaId) => {
       var timestamp = Date.now();
-      var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
+      var reqToken = this._getRequestToken(this.authToken, timestamp);
       return phSend(mediaId, recipients.join(','), snapTime, username, timestamp, reqToken, this._request, this.baseUrl);
     }).then(() => {
       return this;
