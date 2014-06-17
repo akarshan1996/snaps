@@ -1,12 +1,12 @@
-var _ = require('underscore');
-var fs = require('fs');
-var should = require('should');
-var Snaps = require('../lib/snaps').Snaps;
+var _ = require('underscore'),
+    fs = require('fs'),
+    should = require('should'),
+    Snaps = require('../lib/snaps').Snaps;
 
 describe('Snaps', function() {
   var createSnaps;
 
-  beforeEach(function() {
+  before(function() {
     var validateParamsExist = function(params, requestOptions, cb) {
       var missingParams = _.reject(params, function(param) {
         return _.contains(_.keys(requestOptions.qs), param);
@@ -21,23 +21,29 @@ describe('Snaps', function() {
           options.qs.username == 'test-user' &&
           options.qs.password == 'test-password') {
         validateParamsExist(['req_token', 'timestamp'], options, cb);
-        cb(null, null, require('./stubs/login-response.json'));
-      } else if (options.uri.match(/\/ph\/upload$/) &&
-                 options.qs.data == 'sample-image-data' &&
-                 options.qs.username == 'test-user' &&
-                 options.qs.type == 0) {
-        validateParamsExist(['media_id', 'req_token', 'timestamp'], options, cb);
-        cb(null, null, {});
+        cb(null, {statusCode: 200}, JSON.stringify(require('./stubs/login-response.json')));
+      } else if (options.uri.match(/\/ph\/upload$/)) {
+        return {form: function() {
+          return {append: function(key, value) {
+            if (key == 'data' && value == 'invalid-image-data') {
+              return cb(new Error('Bad image data, throwing up'), {statusCode: 500}, {});
+            }
+            else {
+              cb(null, {statusCode: 200}, {});
+            }
+          }}
+        }}
       } else if (options.uri.match(/\/ph\/send$/)) {
-        validateParamsExist(['media_id', 'req_token', 'timestamp', 'recipient', 'time'], options, cb);
-        cb(null, null, {})
+        cb(null, {statusCode: 200}, {})
       } else {
-        cb(new Error('Request not recognized'), null, {});
+        cb(new Error('Request not recognized'), {statusCode: 500}, {});
       }
     }
 
-    Snaps.prototype._encryptImage = function(rawImageData) {
-      return rawImageData;
+    Snaps.prototype._encryptImage = function(imageStream) {
+      return new Promise(function(resolve, reject) {
+        resolve(imageStream);
+      })
     }
 
     createSnaps = function() {
