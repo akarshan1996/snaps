@@ -26,7 +26,7 @@ describe('Snaps', function() {
         return {form: function() {
           return {append: function(key, value) {
             if (key == 'data' && value == 'invalid-image-data') {
-              return cb(new Error('Bad image data, throwing up'), {statusCode: 500}, {});
+              cb(new Error('Bad image data, throwing up'), {statusCode: 500}, {});
             }
             else {
               cb(null, {statusCode: 200}, {});
