@@ -1,10 +1,12 @@
 require('traceur/bin/traceur-runtime');
-var crypto = require('crypto');
-var {bqLogin} = require('./endpoints/bq_login');
-var {map} = require('underscore');
-var request = require('request');
-var {phSend} = require('./endpoints/ph_send');
-var {phUploadImage} = require('./endpoints/ph_upload');
+var crypto = require('crypto'),
+    {bqLogin} = require('./endpoints/bq_login'),
+    fs = require('fs'),
+    {map} = require('underscore'),
+    request = require('request'),
+    {spawn} = require('child_process'),
+    {phSend} = require('./endpoints/ph_send'),
+    {phUploadImage} = require('./endpoints/ph_upload');
 
 export class Snaps {
   constructor(username, password) {
@@ -12,7 +14,7 @@ export class Snaps {
     this.SECRET = 'iEk21fuwZApXlz93750dmW22pw389dPwOk';
     this.PATTERN = '0001110111101110001111010101111011010001001110011000110001000110';
     this.baseUrl = 'https://feelinsonice-hrd.appspot.com';
-    this.ENCRYPTION_KEY = 'M02cnQ51Ji97vwT4'
+    this.ENCRYPTION_KEY = '4d3032636e5135314a69393776775434'
 
     var timestamp = Date.now();
     var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
@@ -23,26 +25,35 @@ export class Snaps {
     })
   }
 
-  send(rawImageData, recipients, snapTime, username) {
-    var imageData = this._encryptImage(rawImageData);
-    var timestamp = Date.now();
-    var reqToken = this._getRequestToken(this.authToken, timestamp);
-    var uploadPromise = phUploadImage(imageData, username, timestamp, reqToken, this._request, this.baseUrl);
-    return uploadPromise.then((mediaId) => {
+  send(imageStream, recipients, snapTime, username) {
+    return this._encryptImage(imageStream).then((encryptedImage) => {
+      var timestamp = Date.now();
+      var reqToken = this._getRequestToken(this.authToken, timestamp);
+      return phUploadImage(encryptedImage, username, timestamp, reqToken, this._request, this.baseUrl);
+    }).then((mediaId) => {
       var timestamp = Date.now();
       var reqToken = this._getRequestToken(this.authToken, timestamp);
       return phSend(mediaId, recipients.join(','), snapTime, username, timestamp, reqToken, this._request, this.baseUrl);
     }).then(() => {
       return this;
     }).catch((err) => {
-      console.log(err);
+      throw(err);
     })
   }
 
-  _encryptImage(rawImageData) {
-    var cipher = crypto.createCipher('aes-128-ecb', this.ENCRYPTION_KEY)
-    cipher.update(rawImageData);
-    return cipher.final();
+  _encryptImage(imageStream) {
+    return new Promise((resolve, reject) => {
+      var encrypt = spawn('openssl', ['enc', '-K', this.ENCRYPTION_KEY, '-aes-128-ecb']);
+      var output = new Buffer(0);
+      encrypt.stdout.on('data', (data) => {
+        output = Buffer.concat([output, data]);
+      })
+      encrypt.stdout.on('end', () => {
+        fs.writeFileSync('./tmp/image_output', output);
+        resolve(fs.createReadStream('./tmp/image_output'));
+      })
+      imageStream.pipe(encrypt.stdin);
+    })
   }
 
   _getRequestToken(authToken, timestamp) {
