@@ -21,19 +21,20 @@ export class Snaps {
     var loginPromise = bqLogin(username, password, timestamp, reqToken, this._request, this.baseUrl);
     return loginPromise.then((loginResponse) => {
       this.authToken = loginResponse.auth_token;
+      this.username = username;
       return this;
     })
   }
 
-  send(imageStream, recipients, snapTime, username) {
+  send(imageStream, recipients, snapTime) {
     return this._encryptImage(imageStream).then((encryptedImage) => {
       var timestamp = Date.now();
       var reqToken = this._getRequestToken(this.authToken, timestamp);
-      return phUploadImage(encryptedImage, username, timestamp, reqToken, this._request, this.baseUrl);
+      return phUploadImage(encryptedImage, this.username, timestamp, reqToken, this._request, this.baseUrl);
     }).then((mediaId) => {
       var timestamp = Date.now();
       var reqToken = this._getRequestToken(this.authToken, timestamp);
-      return phSend(mediaId, recipients.join(','), snapTime, username, timestamp, reqToken, this._request, this.baseUrl);
+      return phSend(mediaId, recipients.join(','), snapTime, this.username, timestamp, reqToken, this._request, this.baseUrl);
     }).then(() => {
       return this;
     }).catch((err) => {

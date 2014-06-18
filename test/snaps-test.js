@@ -63,7 +63,7 @@ describe('Snaps', function() {
   describe('#send', function() {
     it('should throw an error when the upload request fails', function(done) {
       var sendTestImage = function(snaps) {
-        return snaps.send('invalid-image-data', ['foo-user', 'bar-user'], 5, 'test-user');
+        return snaps.send('invalid-image-data', ['foo-user', 'bar-user'], 5);
       }
       createSnaps().then(sendTestImage).then(function() {
         done(new Error("'Send image' promise should not have resolved successfully."));
@@ -75,7 +75,7 @@ describe('Snaps', function() {
 
     it('should not throw an error when the upload request succeeds', function(done) {
       var sendTestImage = function(snaps) {
-        return snaps.send('sample-image-data', ['foo-user', 'bar-user'], 5, 'test-user');
+        return snaps.send('sample-image-data', ['foo-user', 'bar-user'], 5);
       }
       createSnaps().then(sendTestImage).then(function(snaps) {
         if (snaps) {
