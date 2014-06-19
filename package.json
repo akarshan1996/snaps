@@ -23,7 +23,7 @@
     "should": "^4.0.1"
   },
   "scripts": {
-    "build": "traceur --dir src lib --modules=commonjs",
-    "test": "npm build && mocha --reporter list"
+    "prepublish": "traceur --dir src lib --modules=commonjs",
+    "test": "npm install && mocha --reporter list"
   }
 }
