@@ -36,21 +36,21 @@ var Snaps = require('snaps').Snaps;
 
 __Note:__ All methods return Promise objects.
 
-`new Snaps(username, password)`
+- `new Snaps(username, password)`
 
-Logs into SnapChat with the specified username and password.
+  Logs into SnapChat with the specified username and password.
 
-`snaps.send(stream, recipients, snapTime)`
+- `snaps.send(stream, recipients, snapTime)`
 
-Sends a Readable stream of an image or a video to all SnapChat usernames specified in the `recipients` array. Images will be visible for `snapTime` seconds.
+  Sends a Readable stream of an image or a video to all SnapChat usernames specified in the `recipients` array. Images will be visible for `snapTime` seconds.
 
-`snaps.getFriends()`
+- `snaps.getFriends()`
 
-Returns an array of all of the logged in user's friends.
+  Returns an array of all of the logged in user's friends.
 
-`snaps.getSnaps()`
+- `snaps.getSnaps()`
 
-Returns an array of all of the logged in user's snaps.
+  Returns an array of all of the logged in user's snaps.
 
 ## Setting up
 
