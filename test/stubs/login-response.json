@@ -50,5 +50,25 @@
       "m": 0,
       "st": 1
     }
+  ],
+  "friends": [
+    {
+      "can_see_custom_stories": true,
+      "name": "teamsnapchat",
+      "display": "Team Snapchat",
+      "type": 0
+    },
+    {
+      "can_see_custom_stories": true,
+      "name": "someguy",
+      "display": "Some Guy",
+      "type": 0
+    },
+    {
+      "can_see_custom_stories": true,
+      "name": "youraccount",
+      "display": "",
+      "type": 1
+    }
   ]
 }

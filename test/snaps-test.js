@@ -120,6 +120,33 @@ describe('Snaps', function() {
     });
   });
 
+  describe('#getFriends', function() {
+    it("returns the user's friends", function() {
+      return login().then(function(snaps) {
+        snaps.getFriends().should.eql([
+          {
+            "name": "teamsnapchat",
+            "displayName": "Team Snapchat",
+            "canSeeCustomStories": true,
+            "isPrivate": false
+          },
+          {
+            "name": "someguy",
+            "displayName": "Some Guy",
+            "canSeeCustomStories": true,
+            "isPrivate": false
+          },
+          {
+            "name": "youraccount",
+            "displayName": "",
+            "canSeeCustomStories": true,
+            "isPrivate": true
+          }
+        ]);
+      });
+    });
+  });
+
   describe('#_getRequestToken', function() {
     it('passes the benchmark', function() {
       return login().then(function(snaps) {

@@ -7,7 +7,8 @@ var crypto = require('crypto'),
     {spawn} = require('child_process'),
     {phSend} = require('./endpoints/ph_send'),
     {phUploadImage} = require('./endpoints/ph_upload'),
-    {presentSnaps} = require('./present_snaps');
+    {presentSnaps} = require('./present_snaps'),
+    {presentFriends} = require('./present_friends');
 
 export class Snaps {
   constructor(username, password) {
@@ -24,6 +25,7 @@ export class Snaps {
       this.authToken = loginResponse.auth_token;
       this.username = username;
       this.snaps = presentSnaps(loginResponse, username);
+      this.friends = presentFriends(loginResponse);
       return this;
     })
   }
@@ -46,6 +48,10 @@ export class Snaps {
 
   getSnaps() {
     return this.snaps;
+  }
+
+  getFriends() {
+    return this.friends;
   }
 
   _encryptImage(imageStream) {
