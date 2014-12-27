@@ -48,14 +48,9 @@ Sends a Readable stream of an image or a video to all SnapChat usernames specifi
 
 Returns an array of all of the logged in user's friends.
 
-Friend objects have the following keys:
-`name`: Friend's SnapChat username.
-`displayName`: Friend's display name in the SnapChat app.
-`canSeeCustomStories`: True if the friend can see your stories, false otherwise.
-`isPrivate`: True if your friend has a private account, false otherwise.
+`snaps.getSnaps()`
 
-
-`snaps.
+Returns an array of all of the logged in user's snaps.
 
 ## Setting up
 
