@@ -4,7 +4,7 @@ var _ = require('underscore'),
     Snaps = require('../lib/snaps').Snaps;
 
 describe('Snaps', function() {
-  var createSnaps;
+  var login;
 
   before(function() {
     var validateParamsExist = function(params, requestOptions, cb) {
@@ -46,14 +46,14 @@ describe('Snaps', function() {
       })
     }
 
-    createSnaps = function() {
+    login = function() {
       return new Snaps('test-user', 'test-password');
     }
   })
 
   describe('#constructor', function() {
     it('should log the user in with the specified username and password', function() {
-      return createSnaps().then(function(snaps) {
+      login().then(function(snaps) {
         snaps._hasAuthToken().should.be.true;
       })
     })
@@ -64,7 +64,7 @@ describe('Snaps', function() {
       var sendTestImage = function(snaps) {
         return snaps.send('invalid-image-data', ['foo-user', 'bar-user'], 5);
       }
-      return createSnaps().then(sendTestImage).then(function(snaps) {
+      return login().then(sendTestImage).then(function(snaps) {
         throw new Error("Test failed: the success callback should not have been called");
       }).catch(function(err) {
         err.message.should.equal("Bad image data, throwing up");
@@ -75,7 +75,7 @@ describe('Snaps', function() {
       var sendTestImage = function(snaps) {
         return snaps.send('sample-image-data', ['foo-user', 'bar-user'], 5);
       }
-      return createSnaps().then(sendTestImage).then(function(snaps) {
+      return login().then(sendTestImage).then(function(snaps) {
         snaps.should.be.ok;
       }).catch(function(err) {
         throw new Error("Test failed: the error callback should not have been called");
@@ -85,7 +85,7 @@ describe('Snaps', function() {
 
   describe('#_getRequestToken', function() {
     it('passes the benchmark', function() {
-      return createSnaps().then(function(snaps) {
+      return login().then(function(snaps) {
         var reqToken = snaps._getRequestToken('m198sOkJEn37DjqZ32lpRu76xmw288xSQ9', 1373209025);
         reqToken.should.equal('9301c956749167186ee713e4f3a3d90446e84d8d19a4ca8ea9b4b314d1c51b7b');
       })
