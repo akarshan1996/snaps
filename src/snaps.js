@@ -27,7 +27,7 @@ export class Snaps {
       this.snaps = presentSnaps(loginResponse, username);
       this.friends = presentFriends(loginResponse);
       return this;
-    })
+    });
   }
 
   send(imageStream, recipients, snapTime) {

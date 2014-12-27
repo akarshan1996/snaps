@@ -17,11 +17,14 @@ describe('Snaps', function() {
     }
 
     Snaps.prototype._request = function(options, cb) {
-      if (options.uri.match(/\/bq\/login$/) &&
-          options.qs.username == 'test-user' &&
-          options.qs.password == 'test-password') {
-        validateParamsExist(['req_token', 'timestamp'], options, cb);
-        cb(null, {statusCode: 200}, JSON.stringify(require('./stubs/login-response.json')));
+      if (options.uri.match(/\/bq\/login$/)) {
+        if (options.qs.username == 'test-user' && options.qs.password == 'test-password') {
+          validateParamsExist(['req_token', 'timestamp'], options, cb);
+          cb(null, {statusCode: 200}, JSON.stringify(require('./stubs/login-response.json')));
+        } else { // incorrect username/password
+          cb(null, {statusCode: 200}, JSON.stringify({status: -100}));
+        }
+
       } else if (options.uri.match(/\/ph\/upload$/)) {
         return {form: function() {
           return {append: function(key, value) {
@@ -33,8 +36,10 @@ describe('Snaps', function() {
             }
           }}
         }}
+
       } else if (options.uri.match(/\/ph\/send$/)) {
         cb(null, {statusCode: 200}, {})
+
       } else {
         cb(new Error('Request not recognized'), {statusCode: 500}, {});
       }
@@ -53,9 +58,17 @@ describe('Snaps', function() {
 
   describe('#constructor', function() {
     it('should log the user in with the specified username and password', function() {
-      login().then(function(snaps) {
+      return login().then(function(snaps) {
         snaps._hasAuthToken().should.be.true;
       })
+    })
+
+    it('should throw an error when the username or password is incorrect', function() {
+      return new Snaps('blah', 'bleh').then(function(snaps) {
+        throw new Error("Test failed: Snaps should not have logged in with incorrect credentials.");
+      }).catch(function(err) {
+        err.message.should.eql('Incorrect username and password combo.');
+      });
     })
   })
 
