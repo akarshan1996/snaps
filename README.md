@@ -16,3 +16,15 @@ var Snaps = require('snaps').Snaps;
   // handle error
 })
 ```
+
+## Setting up
+
+```
+npm install
+```
+
+## Running tests
+
+```
+npm test
+```
