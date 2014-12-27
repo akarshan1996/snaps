@@ -32,6 +32,31 @@ var Snaps = require('snaps').Snaps;
 })
 ```
 
+## API
+
+__Note:__ All methods return Promise objects.
+
+`new Snaps(username, password)`
+
+Logs into SnapChat with the specified username and password.
+
+`snaps.send(stream, recipients, snapTime)`
+
+Sends a Readable stream of an image or a video to all SnapChat usernames specified in the `recipients` array. Images will be visible for `snapTime` seconds.
+
+`snaps.getFriends()`
+
+Returns an array of all of the logged in user's friends.
+
+Friend objects have the following keys:
+`name`: Friend's SnapChat username.
+`displayName`: Friend's display name in the SnapChat app.
+`canSeeCustomStories`: True if the friend can see your stories, false otherwise.
+`isPrivate`: True if your friend has a private account, false otherwise.
+
+
+`snaps.
+
 ## Setting up
 
 ```
