@@ -25,6 +25,7 @@
   },
   "scripts": {
     "prepublish": "traceur --dir src lib --modules=commonjs",
-    "test": "npm install && mocha --reporter list"
+    "pretest": "traceur --dir src lib --modules=commonjs",
+    "test": "mocha --reporter list"
   }
 }
