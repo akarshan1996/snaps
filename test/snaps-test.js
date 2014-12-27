@@ -83,6 +83,43 @@ describe('Snaps', function() {
     })
   })
 
+  describe('#getSnaps', function() {
+    it("returns the user's snaps", function() {
+      return login().then(function(snaps) {
+        snaps.getSnaps().should.equal([
+          {
+            "id": "894720385130955367s",
+            "sender": "test-user",
+            "recipient": "someguy",
+            "lastInteracted": 1385130955367,
+            "sent": 1385130955367,
+            "mediaType": "image",
+            "state": "delivered"
+          },
+          {
+            "id": "116748384417608719r",
+            "sender": "randomdude",
+            "recipient": "test-user",
+            "lastInteracted": 1384417608719,
+            "sent": 1384417608719,
+            "mediaType": "image",
+            "state": "viewed",
+          },
+          {
+            "id": "325924384416555224r",
+            "sender": "teamsnapchat",
+            "recipient": "test-user",
+            "viewableFor": 10,
+            "lastInteracted": 1384416555224,
+            "sent": 1384416555224,
+            "mediaType": "image",
+            "state": "delivered"
+          }
+        ]);
+      });
+    });
+  });
+
   describe('#_getRequestToken', function() {
     it('passes the benchmark', function() {
       return login().then(function(snaps) {
