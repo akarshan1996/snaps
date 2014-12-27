@@ -7,6 +7,7 @@ var crypto = require('crypto'),
     {spawn} = require('child_process'),
     {phSend} = require('./endpoints/ph_send'),
     {phUploadImage} = require('./endpoints/ph_upload'),
+    {phBlob} = require('./endpoints/ph_blob'),
     {presentSnaps} = require('./present_snaps'),
     {presentFriends} = require('./present_friends');
 
@@ -31,7 +32,7 @@ export class Snaps {
   }
 
   send(imageStream, recipients, snapTime) {
-    return this._encryptImage(imageStream).then((encryptedImage) => {
+    return this._encrypt(imageStream).then((encryptedImage) => {
       var timestamp = Date.now();
       var reqToken = this._getRequestToken(this.authToken, timestamp);
       return phUploadImage(encryptedImage, this.username, timestamp, reqToken, this._request, this.baseUrl);
@@ -46,6 +47,15 @@ export class Snaps {
     })
   }
 
+  fetchSnap(id) {
+    var timestamp = Date.now();
+    var reqToken = this._getRequestToken(this.authToken, timestamp);
+    var encryptedData = null;
+    return phBlob(id, this.username, timestamp, reqToken, this._request, this.baseUrl).then((data) => {
+      return this._decrypt(data);
+    });
+  }
+
   getSnaps() {
     return this.snaps;
   }
@@ -54,18 +64,28 @@ export class Snaps {
     return this.friends;
   }
 
-  _encryptImage(imageStream) {
+  _encrypt(stream) {
+    var openSslParams = ['enc', '-K', this.ENCRYPTION_KEY, '-aes-128-ecb'];
+    return this._encryptOrDecrypt(stream, openSslParams);
+  }
+
+  _decrypt(stream) {
+    var openSslParams = ['enc', '-d', '-K', this.ENCRYPTION_KEY, '-aes-128-ecb'];
+    return this._encryptOrDecrypt(stream, openSslParams);
+  }
+
+  _encryptOrDecrypt(input, openSslParams) {
     return new Promise((resolve, reject) => {
-      var encrypt = spawn('openssl', ['enc', '-K', this.ENCRYPTION_KEY, '-aes-128-ecb']);
+      var openssl = spawn('openssl', openSslParams);
       var output = new Buffer(0);
-      encrypt.stdout.on('data', (data) => {
+      openssl.stdout.on('data', (data) => {
         output = Buffer.concat([output, data]);
       })
-      encrypt.stdout.on('end', () => {
+      openssl.stdout.on('end', () => {
         fs.writeFileSync('./tmp/image_output', output);
         resolve(fs.createReadStream('./tmp/image_output'));
       })
-      imageStream.pipe(encrypt.stdin);
+      input.pipe(openssl.stdin);
     })
   }
 

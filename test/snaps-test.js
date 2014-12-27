@@ -45,9 +45,9 @@ describe('Snaps', function() {
       }
     }
 
-    Snaps.prototype._encryptImage = function(imageStream) {
+    Snaps.prototype._encrypt = function(stream) {
       return new Promise(function(resolve, reject) {
-        resolve(imageStream);
+        resolve(stream);
       })
     }
 
