@@ -67,7 +67,7 @@ describe('Snaps', function() {
       return login().then(sendTestImage).then(function(snaps) {
         throw new Error("Test failed: the success callback should not have been called");
       }).catch(function(err) {
-        err.message.should.equal("Bad image data, throwing up");
+        err.message.should.eql("Bad image data, throwing up");
       })
     })
 
@@ -86,7 +86,7 @@ describe('Snaps', function() {
   describe('#getSnaps', function() {
     it("returns the user's snaps", function() {
       return login().then(function(snaps) {
-        snaps.getSnaps().should.equal([
+        snaps.getSnaps().should.eql([
           {
             "id": "894720385130955367s",
             "sender": "test-user",
@@ -124,7 +124,7 @@ describe('Snaps', function() {
     it('passes the benchmark', function() {
       return login().then(function(snaps) {
         var reqToken = snaps._getRequestToken('m198sOkJEn37DjqZ32lpRu76xmw288xSQ9', 1373209025);
-        reqToken.should.equal('9301c956749167186ee713e4f3a3d90446e84d8d19a4ca8ea9b4b314d1c51b7b');
+        reqToken.should.eql('9301c956749167186ee713e4f3a3d90446e84d8d19a4ca8ea9b4b314d1c51b7b');
       })
     })
   });

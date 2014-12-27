@@ -23,7 +23,7 @@ export class Snaps {
     return loginPromise.then((loginResponse) => {
       this.authToken = loginResponse.auth_token;
       this.username = username;
-      this.snaps = presentSnaps(loginResponse);
+      this.snaps = presentSnaps(loginResponse, username);
       return this;
     })
   }
