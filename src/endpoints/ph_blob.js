@@ -22,6 +22,6 @@ export function phBlob(id, username, timestamp, reqToken, request, baseUrl) {
       } else {
         reject(new Error("Status code of send request was " + response.statusCode));
       }
-    }).pause();
+    });
   })
 }
