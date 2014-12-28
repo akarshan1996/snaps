@@ -17,7 +17,6 @@ export class Snaps {
     this.SECRET = 'iEk21fuwZApXlz93750dmW22pw389dPwOk';
     this.PATTERN = '0001110111101110001111010101111011010001001110011000110001000110';
     this.baseUrl = 'https://feelinsonice-hrd.appspot.com';
-    this.ENCRYPTION_KEY = '4d3032636e5135314a69393776775434';
 
     var timestamp = Date.now();
     var reqToken = this._getRequestToken(this.STATIC_TOKEN, timestamp);
