@@ -15,14 +15,8 @@ export function decrypt(stream) {
 var encryptOrDecrypt = function(input, openSslParams) {
   return new Promise((resolve, reject) => {
     var openssl = spawn('openssl', openSslParams);
-    var output = new Buffer(0);
-    openssl.stdout.on('data', (data) => {
-      output = Buffer.concat([output, data]);
-    })
-    openssl.stdout.on('end', () => {
-      fs.writeFileSync('./tmp/image_output', output);
-      resolve(fs.createReadStream('./tmp/image_output'));
-    })
     input.pipe(openssl.stdin);
+    input.resume();
+    resolve(openssl.stdout);
   })
 }
