@@ -54,7 +54,14 @@ describe('Snaps', function() {
       }
 
       else if (options.uri.match(/\/ph\/blob$/)) {
-        return fs.createReadStream('./test/stubs/' + options.qs.id + '.jpg');
+        stream = fs.createReadStream('./test/stubs/' + options.qs.id + '.jpg');
+        stream.on('error', function() {
+          stream.emit('response', {statusCode: 410});
+        });
+        stream.on('readable', function() {
+          stream.emit('response', {statusCode: 200})
+        });
+        return stream;
       }
 
       else {
@@ -130,7 +137,7 @@ describe('Snaps', function() {
       return login().then(function(snaps) {
         return snaps.fetchSnap('missing-snap');
       }).catch(function(err) {
-        err.should.be.ok;
+        err.message.should.eql('Status code of send request was 410');
       });
     });
   });

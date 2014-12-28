@@ -9,17 +9,19 @@ export function phBlob(id, username, timestamp, reqToken, request, baseUrl) {
   }
 
   return new Promise((resolve, reject) => {
-    var requestStream = request({
+    request({
       "uri": baseUrl + '/ph/blob',
       "qs": sendParams,
       "method": "POST",
       "timeout": 2000
-    });
-    requestStream.on('error', function(err) {
+    }).on('error', function(err) {
       reject(err);
-    });
-    requestStream.on('readable', function() {
-      resolve(requestStream);
+    }).on('response', function(response) {
+      if (response.statusCode === 200) {
+        resolve(this);
+      } else {
+        reject(new Error("Status code of send request was " + response.statusCode));
+      }
     });
   })
 }
