@@ -34,15 +34,13 @@ var Snaps = require('snaps').Snaps;
 
 ## API
 
-__Note:__ All methods return Promise objects.
-
 - `new Snaps(username, password)`
 
-  Logs into SnapChat with the specified username and password.
+  Logs into SnapChat with the specified username and password. Returns a promise whose fulfillment handler has a single param: an instance of `Snaps` logged into the particular user.
 
 - `snaps.send(stream, recipients, snapTime)`
 
-  Sends a Readable stream of an image or a video to all SnapChat usernames specified in the `recipients` array. Images will be visible for `snapTime` seconds.
+  Sends a Readable stream of an image or a video to all SnapChat usernames specified in the `recipients` array. Images will be visible for `snapTime` seconds. Returns a promise whose fulfillment handler has a single param: the same instance of `Snaps` that called `send`.
 
 - `snaps.getFriends()`
 
