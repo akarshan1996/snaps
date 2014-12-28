@@ -1,9 +1,9 @@
 snaps
 =====
 
-Snapchat API wrapper in JavaScript, using some ES6 features via Traceur.
+Snapchat API wrapper for use with Node.js libraries and applications.
 
-## Example
+## Examples
 Sending a friend a snap:
 ```javascript
 var Snaps = require('snaps').Snaps;
@@ -32,15 +32,23 @@ var Snaps = require('snaps').Snaps;
 })
 ```
 
+Retrieving a snap:
+```javascript
+```
+
 ## API
 
 - `new Snaps(username, password)`
-
+  
   Logs into SnapChat with the specified username and password. Returns a promise whose fulfillment handler has a single param: an instance of `Snaps` logged into the particular user.
 
 - `snaps.send(stream, recipients, snapTime)`
 
-  Sends a Readable stream of an image or a video to all SnapChat usernames specified in the `recipients` array. Images will be visible for `snapTime` seconds. Returns a promise whose fulfillment handler has a single param: the same instance of `Snaps` that called `send`.
+  Sends an image or a video (specified by the Readable stream in the `stream` param) to all SnapChat usernames specified in the `recipients` param. Images will be visible for `snapTime` seconds. Returns a promise whose fulfillment handler has a single param: the same instance of `Snaps` that called `send`.
+  
+- `snaps.fetchSnap(id)`
+
+  Fetches a snap specified by `id`. Returns a promise whose fulfillment handler has a single param: a Readable stream that outputs the decrypted image or video.
 
 - `snaps.getFriends()`
 
@@ -49,6 +57,8 @@ var Snaps = require('snaps').Snaps;
 - `snaps.getSnaps()`
 
   Returns an array of all of the logged in user's snaps.
+
+__Tip:__ all of the promises mentioned above will call their rejection handlers if there is a connection error or if the endpoint returns a non-200 status.
 
 ## Setting up
 
