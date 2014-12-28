@@ -41,9 +41,7 @@ export class Snaps {
       return phSend(mediaId, recipients.join(','), snapTime, this.username, timestamp, reqToken, this._request, this.baseUrl);
     }).then(() => {
       return this;
-    }).catch((err) => {
-      throw(err);
-    })
+    });
   }
 
   fetchSnap(id) {
