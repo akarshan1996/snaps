@@ -9,13 +9,17 @@ export function phBlob(id, username, timestamp, reqToken, request, baseUrl) {
   }
 
   return new Promise((resolve, reject) => {
-    resolve(request({
+    var requestStream = request({
       "uri": baseUrl + '/ph/blob',
       "qs": sendParams,
       "method": "POST",
       "timeout": 2000
-    }).on('error', function(err) {
+    });
+    requestStream.on('error', function(err) {
       reject(err);
-    }));
+    });
+    requestStream.on('readable', function() {
+      resolve(requestStream);
+    });
   })
 }

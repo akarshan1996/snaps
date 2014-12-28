@@ -25,8 +25,9 @@ describe('Snaps', function() {
         } else { // incorrect username/password
           cb(null, {statusCode: 200}, JSON.stringify({status: -100}));
         }
+      }
 
-      } else if (options.uri.match(/\/ph\/upload$/)) {
+      else if (options.uri.match(/\/ph\/upload$/)) {
         return {form: function() {
           return {append: function(key, value) {
             if (key === 'data') {
@@ -46,11 +47,17 @@ describe('Snaps', function() {
             }
           }}
         }}
+      }
 
-      } else if (options.uri.match(/\/ph\/send$/)) {
+      else if (options.uri.match(/\/ph\/send$/)) {
         cb(null, {statusCode: 200}, {})
+      }
 
-      } else {
+      else if (options.uri.match(/\/ph\/blob$/)) {
+        return fs.createReadStream('./test/stubs/' + options.qs.id + '.jpg');
+      }
+
+      else {
         cb(new Error('Request not recognized'), {statusCode: 500}, {});
       }
     }
@@ -91,7 +98,7 @@ describe('Snaps', function() {
 
     it('should not throw an error when the upload request succeeds', function() {
       var sendTestImage = function(snaps) {
-        var validImageData = fs.createReadStream('./test/stubs/valid-image-data.jpg');
+        var validImageData = fs.createReadStream('./test/stubs/image-data.jpg');
         return snaps.send(validImageData, ['foo-user', 'bar-user'], 5);
       }
       return login().then(sendTestImage).then(function(snaps) {
@@ -101,6 +108,32 @@ describe('Snaps', function() {
       });
     })
   })
+
+  describe('#fetchSnap', function() {
+    it("returns a promise that contains a stream of decrypted snap data when the snap ID is valid", function() {
+      return login().then(function(snaps) {
+        return snaps.fetchSnap('encrypted-image-data');
+      }).catch(function(err) {
+        throw new Error("Test failed: error occured when running fetchSnap. " + err.stack);
+      }).then(function(stream) {
+        var decryptedData = "";
+        stream.on('data', function(data) {
+          decryptedData += data;
+        });
+        stream.on('end', function(data) {
+          decryptedData.trim().should.eql('image-data');
+        });
+      });
+    });
+
+    it("throws an error when the snap ID is invalid", function() {
+      return login().then(function(snaps) {
+        return snaps.fetchSnap('missing-snap');
+      }).catch(function(err) {
+        err.should.be.ok;
+      });
+    });
+  });
 
   describe('#getSnaps', function() {
     it("returns the user's snaps", function() {
