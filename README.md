@@ -63,12 +63,11 @@ var Snaps = require('./lib/snaps').Snaps;
     stream.on('data', function(data) {
       output = Buffer.concat([output, data]);
     })
-    return stream.on('end', function() {
+    stream.on('end', function() {
       fs.writeFileSync('./hello.jpg', output);
     });
   }).catch(function(err) {
     // handle error
-    console.log(err);
   });
 });
 ```
