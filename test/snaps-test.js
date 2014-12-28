@@ -37,9 +37,9 @@ describe('Snaps', function() {
                 });
                 stream.on('end', function() {
                   if (decryptedData.trim() === 'invalid-image-data') {
-                    cb(new Error('Bad image data, throwing up'), {statusCode: 500}, decryptedData);
+                    cb(new Error('Bad image data, throwing up'), {statusCode: 500}, {});
                   } else {
-                    cb(null, {statusCode: 200}, decryptedData);
+                    cb(null, {statusCode: 200}, {});
                   }
                 });
               });
