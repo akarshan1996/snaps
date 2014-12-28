@@ -1,7 +1,7 @@
 require('traceur/bin/traceur-runtime');
 var crypto = require('crypto'),
     {bqLogin} = require('./endpoints/bq_login'),
-    fs = require('fs'),
+    {encrypt, decrypt} = require('./encryption'),
     {map} = require('underscore'),
     request = require('request'),
     {spawn} = require('child_process'),
@@ -32,7 +32,7 @@ export class Snaps {
   }
 
   send(imageStream, recipients, snapTime) {
-    return this._encrypt(imageStream).then((encryptedImage) => {
+    return encrypt(imageStream).then((encryptedImage) => {
       var timestamp = Date.now();
       var reqToken = this._getRequestToken(this.authToken, timestamp);
       return phUploadImage(encryptedImage, this.username, timestamp, reqToken, this._request, this.baseUrl);
@@ -50,9 +50,8 @@ export class Snaps {
   fetchSnap(id) {
     var timestamp = Date.now();
     var reqToken = this._getRequestToken(this.authToken, timestamp);
-    var encryptedData = null;
     return phBlob(id, this.username, timestamp, reqToken, this._request, this.baseUrl).then((data) => {
-      return this._decrypt(data);
+      return decrypt(data);
     });
   }
 
@@ -62,31 +61,6 @@ export class Snaps {
 
   getFriends() {
     return this.friends;
-  }
-
-  _encrypt(stream) {
-    var openSslParams = ['enc', '-K', this.ENCRYPTION_KEY, '-aes-128-ecb'];
-    return this._encryptOrDecrypt(stream, openSslParams);
-  }
-
-  _decrypt(stream) {
-    var openSslParams = ['enc', '-d', '-K', this.ENCRYPTION_KEY, '-aes-128-ecb'];
-    return this._encryptOrDecrypt(stream, openSslParams);
-  }
-
-  _encryptOrDecrypt(input, openSslParams) {
-    return new Promise((resolve, reject) => {
-      var openssl = spawn('openssl', openSslParams);
-      var output = new Buffer(0);
-      openssl.stdout.on('data', (data) => {
-        output = Buffer.concat([output, data]);
-      })
-      openssl.stdout.on('end', () => {
-        fs.writeFileSync('./tmp/image_output', output);
-        resolve(fs.createReadStream('./tmp/image_output'));
-      })
-      input.pipe(openssl.stdin);
-    })
   }
 
   _getRequestToken(authToken, timestamp) {

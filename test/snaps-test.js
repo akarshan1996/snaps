@@ -1,7 +1,8 @@
 var _ = require('underscore'),
     fs = require('fs'),
     should = require('should'),
-    Snaps = require('../lib/snaps').Snaps;
+    Snaps = require('../lib/snaps').Snaps,
+    decrypt = require('../lib/encryption').decrypt;
 
 describe('Snaps', function() {
   var login;
@@ -28,11 +29,20 @@ describe('Snaps', function() {
       } else if (options.uri.match(/\/ph\/upload$/)) {
         return {form: function() {
           return {append: function(key, value) {
-            if (key == 'data' && value == 'invalid-image-data') {
-              cb(new Error('Bad image data, throwing up'), {statusCode: 500}, {});
-            }
-            else {
-              cb(null, {statusCode: 200}, {});
+            if (key === 'data') {
+              decrypt(value).then(function(stream) {
+                var decryptedData = "";
+                stream.on('data', function(data) {
+                  decryptedData += data;
+                });
+                stream.on('end', function() {
+                  if (decryptedData.trim() === 'invalid-image-data') {
+                    cb(new Error('Bad image data, throwing up'), {statusCode: 500}, decryptedData);
+                  } else {
+                    cb(null, {statusCode: 200}, decryptedData);
+                  }
+                });
+              });
             }
           }}
         }}
@@ -43,12 +53,6 @@ describe('Snaps', function() {
       } else {
         cb(new Error('Request not recognized'), {statusCode: 500}, {});
       }
-    }
-
-    Snaps.prototype._encrypt = function(stream) {
-      return new Promise(function(resolve, reject) {
-        resolve(stream);
-      })
     }
 
     login = function() {
@@ -75,7 +79,8 @@ describe('Snaps', function() {
   describe('#send', function() {
     it('should throw an error when the upload request fails', function() {
       var sendTestImage = function(snaps) {
-        return snaps.send('invalid-image-data', ['foo-user', 'bar-user'], 5);
+        var invalidImageData = fs.createReadStream('./test/stubs/invalid-image-data.jpg');
+        return snaps.send(invalidImageData, ['foo-user', 'bar-user'], 5);
       }
       return login().then(sendTestImage).then(function(snaps) {
         throw new Error("Test failed: the success callback should not have been called");
@@ -86,7 +91,8 @@ describe('Snaps', function() {
 
     it('should not throw an error when the upload request succeeds', function() {
       var sendTestImage = function(snaps) {
-        return snaps.send('sample-image-data', ['foo-user', 'bar-user'], 5);
+        var validImageData = fs.createReadStream('./test/stubs/valid-image-data.jpg');
+        return snaps.send(validImageData, ['foo-user', 'bar-user'], 5);
       }
       return login().then(sendTestImage).then(function(snaps) {
         snaps.should.be.ok;
