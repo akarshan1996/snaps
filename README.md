@@ -6,6 +6,7 @@ Snapchat API wrapper for use with Node.js libraries and applications.
 ## Examples
 Sending a friend a snap:
 ```javascript
+var fs = require('fs');
 var Snaps = require('snaps').Snaps;
 (new Snaps('my-username', 'my-password')).then(function(snaps) {
   console.log(snaps.getFriends());
@@ -25,8 +26,6 @@ var Snaps = require('snaps').Snaps;
    */
   var file = fs.createReadStream('/path/to/an/image.jpg');
   return snaps.send(file, ['mileyxxcyrus', 'canadiangoose'], 5);
-}).then(function() {
-  // all done!
 }).catch(function(err) {
   // handle error
 })
@@ -34,6 +33,44 @@ var Snaps = require('snaps').Snaps;
 
 Retrieving a snap:
 ```javascript
+var fs = require('fs');
+var Snaps = require('./lib/snaps').Snaps;
+(new Snaps('my-username', 'my-password')).then(function(snaps) {
+  console.log(snaps.getSnaps());
+  /* ->
+    {
+      "id": "894720385130955367s",
+      "sender": "my-username",
+      "recipient": "someguy",
+      "lastInteracted": 1385130955367,
+      "sent": 1385130955367,
+      "mediaType": "image",
+      "state": "viewed"
+    },
+    {
+      "id": "325924384416555224r",
+      "sender": "teamsnapchat",
+      "recipient": "my-username",
+      "viewableFor": 10,
+      "lastInteracted": 1384416555224,
+      "sent": 1384416555224,
+      "mediaType": "image",
+      "state": "delivered"
+    }
+  */
+  return snaps.fetchSnap('325924384416555224r').then(function(stream) {
+    var output = new Buffer(0);
+    stream.on('data', function(data) {
+      output = Buffer.concat([output, data]);
+    })
+    return stream.on('end', function() {
+      fs.writeFileSync('./hello.jpg', output);
+    });
+  }).catch(function(err) {
+    // handle error
+    console.log(err);
+  });
+});
 ```
 
 ## API
