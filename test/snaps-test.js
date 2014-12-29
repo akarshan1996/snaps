@@ -54,7 +54,7 @@ describe('Snaps', function() {
       }
 
       else if (options.uri.match(/\/ph\/blob$/)) {
-        stream = fs.createReadStream('./test/stubs/' + options.qs.id + '.jpg');
+        stream = fs.createReadStream('./test/stubs/' + options.qs.id);
         stream.on('error', function() {
           stream.emit('response', {statusCode: 410});
         });
@@ -93,7 +93,7 @@ describe('Snaps', function() {
   describe('#send', function() {
     it('should throw an error when the upload request fails', function() {
       var sendTestImage = function(snaps) {
-        var invalidImageData = fs.createReadStream('./test/stubs/invalid-image-data.jpg');
+        var invalidImageData = fs.createReadStream('./test/stubs/invalid-image-data');
         return snaps.send(invalidImageData, ['foo-user', 'bar-user'], 5);
       }
       return login().then(sendTestImage).then(function(snaps) {
@@ -105,7 +105,7 @@ describe('Snaps', function() {
 
     it('should not throw an error when the upload request succeeds', function() {
       var sendTestImage = function(snaps) {
-        var validImageData = fs.createReadStream('./test/stubs/image-data.jpg');
+        var validImageData = fs.createReadStream('./test/stubs/image-data');
         return snaps.send(validImageData, ['foo-user', 'bar-user'], 5);
       }
       return login().then(sendTestImage).then(function(snaps) {
