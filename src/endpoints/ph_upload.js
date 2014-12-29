@@ -11,7 +11,7 @@ var generateMediaId = function(username) {
 var upload = function(type, imageData, username, timestamp, reqToken, request, baseUrl) {
   var mediaId = generateMediaId(username);
 
-  var uploadParams = {
+  var formData = {
     "data": imageData,
     "media_id": mediaId,
     "req_token": reqToken,
@@ -21,20 +21,20 @@ var upload = function(type, imageData, username, timestamp, reqToken, request, b
   }
 
   return new Promise((resolve, reject) => {
-    var form = request({
+    request({
       "uri": baseUrl + '/ph/upload',
       "method": "POST",
-      "timeout": 2000
-    }, (err, httpResponse, body) => {
-      if (err || httpResponse.statusCode != 200) {
-        reject(err || new Error("Status code of upload request was " + httpResponse.statusCode));
-      } else {
+      "timeout": 2000,
+      "formData": formData
+    }).on('error', function(err) {
+      reject(err);
+    }).on('response', function(response) {
+      if (response.statusCode === 200) {
         resolve(mediaId);
+      } else {
+        reject(new Error("Status code of upload request was " + response.statusCode));
       }
-    }).form()
-    _(uploadParams).each((value, key) => {
-      form.append(key, value);
-    })
+    });
   })
 }
 

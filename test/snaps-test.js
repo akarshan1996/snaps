@@ -2,7 +2,8 @@ var _ = require('underscore'),
     fs = require('fs'),
     should = require('should'),
     Snaps = require('../lib/snaps').Snaps,
-    decrypt = require('../lib/encryption').decrypt;
+    decrypt = require('../lib/encryption').decrypt,
+    stream = require('stream');
 
 describe('Snaps', function() {
   var login;
@@ -28,25 +29,22 @@ describe('Snaps', function() {
       }
 
       else if (options.uri.match(/\/ph\/upload$/)) {
-        return {form: function() {
-          return {append: function(key, value) {
-            if (key === 'data') {
-              decrypt(value).then(function(stream) {
-                var decryptedData = "";
-                stream.on('data', function(data) {
-                  decryptedData += data;
-                });
-                stream.on('end', function() {
-                  if (decryptedData.trim() === 'invalid-image-data') {
-                    cb(new Error('Bad image data, throwing up'), {statusCode: 500}, {});
-                  } else {
-                    cb(null, {statusCode: 200}, {});
-                  }
-                });
-              });
+        var streamStub = new stream.Readable;
+        var uploadedData = options.formData.data;
+        decrypt(uploadedData).then(function(decryptStream) {
+          var decryptedData = "";
+          decryptStream.on('data', function(data) {
+            decryptedData += data;
+          });
+          decryptStream.on('end', function() {
+            if (decryptedData.trim() === 'invalid-image-data') {
+              streamStub.emit('response', {statusCode: 500});
+            } else {
+              streamStub.emit('response', {statusCode: 200});
             }
-          }}
-        }}
+          });
+        });
+        return streamStub;
       }
 
       else if (options.uri.match(/\/ph\/send$/)) {
@@ -54,14 +52,14 @@ describe('Snaps', function() {
       }
 
       else if (options.uri.match(/\/ph\/blob$/)) {
-        stream = fs.createReadStream('./test/stubs/' + options.qs.id);
-        stream.on('error', function() {
-          stream.emit('response', {statusCode: 410});
+        streamStub = fs.createReadStream('./test/stubs/' + options.qs.id);
+        streamStub.on('error', function() {
+          streamStub.emit('response', {statusCode: 410});
         });
-        stream.on('readable', function() {
-          stream.emit('response', {statusCode: 200})
+        streamStub.on('readable', function() {
+          streamStub.emit('response', {statusCode: 200})
         });
-        return stream;
+        return streamStub;
       }
 
       else {
@@ -99,7 +97,7 @@ describe('Snaps', function() {
       return login().then(sendTestImage).then(function(snaps) {
         throw new Error("Test failed: the success callback should not have been called");
       }).catch(function(err) {
-        err.message.should.eql("Bad image data, throwing up");
+        err.message.should.eql("Status code of upload request was 500");
       })
     })
 

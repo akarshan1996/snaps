@@ -3,14 +3,14 @@ var fs = require('fs'),
 var ENCRYPTION_KEY = '4d3032636e5135314a69393776775434';
 
 export function encrypt(stream) {
-    var openSslParams = ['enc', '-K', ENCRYPTION_KEY, '-aes-128-ecb'];
-    return encryptOrDecrypt(stream, openSslParams);
-  }
+  var openSslParams = ['enc', '-K', ENCRYPTION_KEY, '-aes-128-ecb'];
+  return encryptOrDecrypt(stream, openSslParams);
+}
 
 export function decrypt(stream) {
-    var openSslParams = ['enc', '-d', '-K', ENCRYPTION_KEY, '-aes-128-ecb'];
-    return encryptOrDecrypt(stream, openSslParams);
-  }
+  var openSslParams = ['enc', '-d', '-K', ENCRYPTION_KEY, '-aes-128-ecb'];
+  return encryptOrDecrypt(stream, openSslParams);
+}
 
 var encryptOrDecrypt = function(input, openSslParams) {
   return new Promise((resolve, reject) => {
