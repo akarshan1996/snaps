@@ -9,27 +9,39 @@ describe('Snaps', function() {
   var login;
 
   before(function() {
-    var validateParamsExist = function(params, requestOptions, cb) {
-      var missingParams = _.reject(params, function(param) {
+    var getMissingParams = function(expectedParams, requestOptions) {
+      return _.reject(expectedParams, function(param) {
         return _.contains(_.keys(requestOptions.qs), param);
-      })
-      if (missingParams.length > 0) {
-        cb(new Error("The following params were missing in the request: " + missingParams.join(', ')), null, {});
-      }
+      });
     }
 
     Snaps.prototype._request = function(options, cb) {
       if (options.uri.match(/\/bq\/login$/)) {
-        if (options.qs.username == 'test-user' && options.qs.password == 'test-password') {
-          validateParamsExist(['req_token', 'timestamp'], options, cb);
-          cb(null, {statusCode: 200}, JSON.stringify(require('./stubs/login-response.json')));
-        } else { // incorrect username/password
-          cb(null, {statusCode: 200}, JSON.stringify({status: -100}));
+        var mockStream = new stream.Readable;
+        var missingParams = getMissingParams(['username', 'password', 'req_token', 'timestamp'], options);
+        if (missingParams.length > 0) {
+          mockStream._read = function() {
+            mockStream.emit('error', new Error("The following params were missing in the login request: " + missingParams.join(', ')));
+          }
         }
+        else if (options.qs.username == 'test-user' && options.qs.password == 'test-password') {
+          mockStream._read = function() {
+            mockStream.emit('response', {statusCode: 200});
+            mockStream.push(JSON.stringify(require('./stubs/login-response.json')));
+            mockStream.push(null);
+          }
+        } else { // incorrect username/password
+          mockStream._read = function() {
+            mockStream.emit('response', {statusCode: 200});
+            mockStream.push(JSON.stringify({status: -100}));
+            mockStream.push(null);
+          }
+        }
+        return mockStream;
       }
 
       else if (options.uri.match(/\/ph\/upload$/)) {
-        var streamStub = new stream.Readable;
+        var mockStream = new stream.Readable;
         var uploadedData = options.formData.data;
         decrypt(uploadedData).then(function(decryptStream) {
           var decryptedData = "";
@@ -38,28 +50,32 @@ describe('Snaps', function() {
           });
           decryptStream.on('end', function() {
             if (decryptedData.trim() === 'invalid-image-data') {
-              streamStub.emit('response', {statusCode: 500});
+              mockStream.emit('response', {statusCode: 500});
             } else {
-              streamStub.emit('response', {statusCode: 200});
+              mockStream.emit('response', {statusCode: 200});
             }
           });
         });
-        return streamStub;
+        return mockStream;
       }
 
       else if (options.uri.match(/\/ph\/send$/)) {
-        cb(null, {statusCode: 200}, {})
+        var mockStream = new stream.Readable;
+        mockStream._read = function() {
+          mockStream.emit('response', {statusCode: 200});
+        }
+        return mockStream;
       }
 
       else if (options.uri.match(/\/ph\/blob$/)) {
-        streamStub = fs.createReadStream('./test/stubs/' + options.qs.id);
-        streamStub.on('error', function() {
-          streamStub.emit('response', {statusCode: 410});
+        stubStream = fs.createReadStream('./test/stubs/' + options.qs.id);
+        stubStream.on('error', function() {
+          stubStream.emit('response', {statusCode: 410});
         });
-        streamStub.on('readable', function() {
-          streamStub.emit('response', {statusCode: 200})
+        stubStream.on('readable', function() {
+          stubStream.emit('response', {statusCode: 200})
         });
-        return streamStub;
+        return stubStream;
       }
 
       else {
@@ -135,7 +151,7 @@ describe('Snaps', function() {
       return login().then(function(snaps) {
         return snaps.fetchSnap('missing-snap');
       }).catch(function(err) {
-        err.message.should.eql('Status code of send request was 410');
+        err.message.should.eql('Status code of upload request was 410');
       });
     });
   });
