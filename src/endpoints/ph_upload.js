@@ -1,4 +1,5 @@
-var _ = require('underscore');
+var {commonParams, commonHeaders} = require('./common_params_and_headers'),
+    {extend} = require('underscore');
 
 var generateMediaId = function(username) {
   var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -11,18 +12,19 @@ var generateMediaId = function(username) {
 var upload = function(type, imageData, username, timestamp, reqToken, request, baseUrl) {
   var mediaId = generateMediaId(username);
 
-  var formData = {
+  var formData = extend({
     "data": imageData,
     "media_id": mediaId,
     "req_token": reqToken,
     "timestamp": timestamp,
     "type": type,
     "username": username
-  }
+  }, commonParams);
 
   return new Promise((resolve, reject) => {
     request({
       "uri": baseUrl + '/ph/upload',
+      "headers": commonHeaders,
       "method": "POST",
       "timeout": 2000,
       "formData": formData

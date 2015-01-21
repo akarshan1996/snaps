@@ -1,18 +1,22 @@
+var {commonParams, commonHeaders} = require('./common_params_and_headers'),
+    {extend} = require('underscore');
+
 export function bqLogin(username, password, timestamp, reqToken, request, baseUrl) {
-  var loginParams = {
+  var loginParams = extend({
     "username": username,
     "timestamp": timestamp,
     "req_token": reqToken,
-    "password": password
-  }
+    "password": password,
+  }, commonParams);
 
   return new Promise((resolve, reject) => {
     var error;
     request({
       "uri": baseUrl + '/bq/login',
+      "headers": commonHeaders,
       "qs": loginParams,
       "method": "POST",
-      "timeout": 2000
+      "timeout": 2000,
     }, (err, httpResponse, body) => {
       try {
         var parsedBody = JSON.parse(body);

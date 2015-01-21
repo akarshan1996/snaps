@@ -1,5 +1,8 @@
+var {commonParams, commonHeaders} = require('./common_params_and_headers'),
+    {extend} = require('underscore');
+
 export function phSend(mediaId, recipients, snapTime, username, timestamp, reqToken, request, baseUrl) {
-  var sendParams = {
+  var sendParams = extend({
     "media_id": mediaId,
     "recipient": recipients,
     "req_token": reqToken,
@@ -7,11 +10,12 @@ export function phSend(mediaId, recipients, snapTime, username, timestamp, reqTo
     "timestamp": timestamp,
     "username": username,
     "zipped": 0
-  }
+  }, commonParams);
 
   return new Promise((resolve, reject) => {
     request({
       "uri": baseUrl + '/ph/send',
+      "headers": commonHeaders,
       "qs": sendParams,
       "method": "POST",
       "timeout": 2000
