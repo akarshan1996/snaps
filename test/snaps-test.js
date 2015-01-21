@@ -91,7 +91,7 @@ describe('Snaps', function() {
   describe('#constructor', function() {
     it('should log the user in with the specified username and password', function() {
       return login().then(function(snaps) {
-        snaps._hasAuthToken().should.be.true;
+        snaps.authToken.should.equal("77ba2422-6cab-5967-bc28-eaa95eb44fb0");
       })
     })
 

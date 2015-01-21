@@ -76,10 +76,6 @@ export class Snaps {
     }).join('');
   }
 
-  _hasAuthToken() {
-    return this.authToken != null;
-  }
-
   _request(options, cb) {
     return request(options, cb);
   }
