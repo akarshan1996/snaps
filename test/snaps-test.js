@@ -42,20 +42,30 @@ describe('Snaps', function() {
 
       else if (options.uri.match(/\/ph\/upload$/)) {
         var mockStream = new stream.Readable;
-        var uploadedData = options.formData.data;
-        decrypt(uploadedData).then(function(decryptStream) {
-          var decryptedData = "";
-          decryptStream.on('data', function(data) {
-            decryptedData += data;
-          });
-          decryptStream.on('end', function() {
-            if (decryptedData.trim() === 'invalid-image-data') {
-              mockStream.emit('response', {statusCode: 500});
-            } else {
-              mockStream.emit('response', {statusCode: 200});
+        mockStream.form = function() {
+          return {
+            append: function(key, value) {
+              if (key === 'data') {
+                var encryptedBuffer = value;
+                var encryptedBufferStream = new stream.PassThrough();
+                encryptedBufferStream.end(encryptedBuffer);
+                decrypt(encryptedBufferStream).then(function(decryptStream) {
+                  var decryptedData = "";
+                  decryptStream.on('data', function(data) {
+                    decryptedData += data;
+                  });
+                  decryptStream.on('end', function() {
+                    if (decryptedData.trim() === 'invalid-image-data') {
+                      mockStream.emit('response', {statusCode: 500});
+                    } else {
+                      mockStream.emit('response', {statusCode: 200});
+                    }
+                  });
+                });
+              }
             }
-          });
-        });
+          }
+        }
         return mockStream;
       }
 

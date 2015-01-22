@@ -1,5 +1,6 @@
 var {commonParams, commonHeaders} = require('./common_params_and_headers'),
-    {extend} = require('underscore');
+    {each, extend} = require('underscore'),
+    FormData = require('request/node_modules/form-data');
 
 var generateMediaId = function(username) {
   var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -12,23 +13,26 @@ var generateMediaId = function(username) {
 var upload = function(type, imageData, username, timestamp, reqToken, request, baseUrl) {
   var mediaId = generateMediaId(username);
 
-  var formData = extend({
-    "data": imageData,
+  var req = request({
+    "uri": baseUrl + "/ph/upload",
+    "headers": commonHeaders,
+    "method": "POST",
+    "timeout": 2000
+  });
+  var form = req.form();
+  form.append('data', imageData, {filename: 'image'});
+  each(extend({
     "media_id": mediaId,
     "req_token": reqToken,
     "timestamp": timestamp,
     "type": type,
     "username": username
-  }, commonParams);
+  }, commonParams), function(value, key) {
+    form.append(key, value);
+  });
 
   return new Promise((resolve, reject) => {
-    request({
-      "uri": baseUrl + '/ph/upload',
-      "headers": commonHeaders,
-      "method": "POST",
-      "timeout": 2000,
-      "formData": formData
-    }).on('error', function(err) {
+    req.on('error', function(err) {
       reject(err);
     }).on('response', function(response) {
       if (response.statusCode === 200) {

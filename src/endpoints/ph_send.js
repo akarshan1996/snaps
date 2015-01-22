@@ -25,7 +25,7 @@ export function phSend(mediaId, recipients, snapTime, username, timestamp, reqTo
       if (response.statusCode === 200) {
         resolve();
       } else {
-        reject(new Error("Status code of send request was " + httpResponse.statusCode));
+        reject(new Error("Status code of send request was " + response.statusCode));
       }
     }).on('data', function(chunk) {
     });
