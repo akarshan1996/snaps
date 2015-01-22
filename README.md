@@ -59,13 +59,7 @@ var Snaps = require('./lib/snaps').Snaps;
     }
   */
   return snaps.fetchSnap('325924384416555224r').then(function(stream) {
-    var output = new Buffer(0);
-    stream.on('data', function(data) {
-      output = Buffer.concat([output, data]);
-    })
-    stream.on('end', function() {
-      fs.writeFileSync('./hello.jpg', output);
-    });
+    return stream.pipe(fs.createWriteStream('./fetched_snap.jpg'));
   }).catch(function(err) {
     // handle error
   });
