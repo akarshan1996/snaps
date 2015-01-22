@@ -161,7 +161,7 @@ describe('Snaps', function() {
       return login().then(function(snaps) {
         return snaps.fetchSnap('missing-snap');
       }).catch(function(err) {
-        err.message.should.eql('Status code of upload request was 410');
+        err.message.should.eql('Status code of fetch request was 410');
       });
     });
   });

@@ -26,6 +26,9 @@ var encryptOrDecrypt = function(input, openSslParams) {
   return new Promise((resolve, reject) => {
     var openssl = spawn('openssl', openSslParams);
     input.pipe(openssl.stdin);
+    if (input._paused) {
+      input.resume();
+    }
     resolve(openssl.stdout);
   })
 }

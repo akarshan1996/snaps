@@ -19,6 +19,7 @@ var upload = function(type, imageData, username, timestamp, reqToken, request, b
     "method": "POST",
     "timeout": 2000
   });
+
   var form = req.form();
   form.append('data', imageData, {filename: 'image'});
   each(extend({
